@@ -1,22 +1,28 @@
 package ra.demovideo.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ra.demovideo.model.Video;
 import ra.demovideo.service.IGenericService;
-import ra.demovideo.until.ConnectDB;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
+import javax.sql.DataSource;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class VideoService implements IGenericService<Video,Long> {
+    @Autowired
+    private DataSource dataSource;
     @Override
     public List<Video> findAll() {
-        Connection conn = ConnectDB.getConnection();
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         List<Video> videos = new ArrayList<>();
         try {
             CallableStatement callSt = conn.prepareCall("{call FindAll}");
@@ -33,14 +39,25 @@ public class VideoService implements IGenericService<Video,Long> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            ConnectDB.closeConnection(conn);
+            if (conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         return videos;
     }
 
     @Override
     public void save(Video video) {
-        Connection conn = ConnectDB.getConnection();
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         try {
             if (video.getId() == null) {
@@ -62,14 +79,25 @@ public class VideoService implements IGenericService<Video,Long> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            ConnectDB.closeConnection(conn);
+            if (conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
     }
 
     @Override
     public void delete(Long id) {
-        Connection conn = ConnectDB.getConnection();
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         try {
             // xóa ảnh phụ
             CallableStatement callSt = conn.prepareCall("{call DeleteVideo(?)}");
@@ -78,13 +106,24 @@ public class VideoService implements IGenericService<Video,Long> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            ConnectDB.closeConnection(conn);
+            if (conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 
     @Override
     public Video findById(Long id) {
-        Connection conn = ConnectDB.getConnection();
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         Video v = null;
         try {
             CallableStatement callSt = conn.prepareCall("{call FindById(?)}");
@@ -101,7 +140,13 @@ public class VideoService implements IGenericService<Video,Long> {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            ConnectDB.closeConnection(conn);
+            if (conn!=null){
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         return v;
     }
